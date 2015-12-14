@@ -38,3 +38,4 @@
     - "{{ jenkins_plugins }}"
   notify:
     - restart jenkins
+

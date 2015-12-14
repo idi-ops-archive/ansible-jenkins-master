@@ -11,8 +11,6 @@ jenkins_packages:
   - java-1.7.0-openjdk
   - python-httplib2
   - python-pip
-  - python-virtualenv
-  - libyaml
   - curl
   - git
   - nodejs
@@ -21,3 +19,4 @@ jenkins_packages:
 
 jenkins_pip_packages:
   - jenkins-job-builder
+
