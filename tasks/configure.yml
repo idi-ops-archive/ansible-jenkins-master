@@ -39,3 +39,21 @@
   notify:
     - restart jenkins
 
+- name: Generate temporary file
+  command: /usr/bin/mktemp
+  register: mktemp
+
+- name: Transfer Groovy script used for security configuration
+  template:
+    src: security.gy.j2
+    dest: "{{ mktemp.stdout }}"
+    backup: no
+
+- name: Enable matrix-based security and create administrators
+  shell: "java -jar {{ jenkins_cli_jar }} -s http://localhost:{{ jenkins_port}}/ groovy {{ mktemp.stdout }}"
+
+- name: Remove Groovy script
+  file:
+    path: "{{ mktemp.stdout }}"
+    state: absent
+

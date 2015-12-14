@@ -54,6 +54,11 @@
     url: "http://localhost:{{ jenkins_port }}/jnlpJars/jenkins-cli.jar"
     dest: "{{ jenkins_cli_jar }}"
 
+- name: Create deploy user
+  user:
+    name: deploy
+    state: present
+
 - name: Create jenkins_jobs directory
   file:
     path: /home/deploy/jenkins_jobs
@@ -66,17 +71,4 @@
     dest: /home/deploy/jenkins_jobs.ini
     owner: deploy
 
-# Workaround against Jenkins downgrading plugins back to bundled versions
-#- name: Restart Jenkins
-#  service:
-#    name: jenkins
-#    state: restarted
-
-#- name: Wait for Jenkins to be ready
-#  shell: curl -D - --silent http://{{ jenkins_hostname }}:8080/cli/
-#  register: result
-#  until: (result.stdout.find("200 OK") != -1) and (result.stdout.find("Please wait while") == -1)
-#  retries: "{{ jenkins_conn_retries }}"
-#  delay: "{{ jenkins_conn_delay }}"
-#  changed_when: false
 
