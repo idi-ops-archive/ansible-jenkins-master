@@ -13,7 +13,7 @@
 # lable through the web interface.
 
 - name: Get list of currently installed plugins
-  shell: "java -jar {{ jenkins_cli_jar }} -s http://localhost:{{ jenkins_port }}/ list-plugins | awk '{ print $1 }'"
+  shell: "java -jar {{ jenkins_cli_jar }} -s http://localhost:{{ jenkins_port }}/ list-plugins {{ jenkins_admin_credentials }} | awk '{ print $1 }'"
   register: plugin_list
 
 - name: Install additional plugins and update everything
@@ -51,6 +51,12 @@
 
 - name: Enable matrix-based security and create administrators
   shell: "java -jar {{ jenkins_cli_jar }} -s http://localhost:{{ jenkins_port}}/ groovy {{ mktemp.stdout }}"
+  register: jenkins_security
+  ignore_errors: True
+
+- name: Enable matrix-based security and create administrators
+  shell: "java -jar {{ jenkins_cli_jar }} -s http://localhost:{{ jenkins_port}}/ groovy {{ mktemp.stdout }} {{ jenkins_admin_credentials }}"
+  when: jenkins_security.stderr.find("hudson.security.AccessDeniedException2") != -1
 
 - name: Remove Groovy script
   file:

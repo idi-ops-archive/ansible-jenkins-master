@@ -12,6 +12,7 @@ jenkins_allow_signups: false
 jenkins_admins:
   - admin
 
+jenkins_admin_credentials: "--username {{ jenkins_admins[0] }} --password {{ jenkins_initial_password }}"
 jenkins_aux_dir: /opt/jenkins
 jenkins_cli_jar: /opt/jenkins/jenkins-cli.jar
 jenkins_home: /var/lib/jenkins
@@ -27,14 +28,14 @@ jenkins_conn_delay: 10
 
 jenkins_plugins:
   - build-timeout
-  - git-client 
+  - git-client
   - git
   - github
   - github-api
   - multiple-scms
-  - publish-over-ssh 
+  - publish-over-ssh
   - ssh
   - greenballs
-  - global-post-script 
+  - global-post-script
   - tap
 
