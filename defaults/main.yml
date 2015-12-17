@@ -27,6 +27,10 @@ jenkins_conn_retries: 60
 jenkins_conn_delay: 10
 
 jenkins_plugins:
+  - mapdb-api
+  - scm-api
+  - token-macro
+  - plain-credentials
   - build-timeout
   - git-client
   - git
