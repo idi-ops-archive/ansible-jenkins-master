@@ -42,4 +42,7 @@ jenkins_plugins:
   - greenballs
   - global-post-script
   - tap
+  - authentication-tokens
+  - docker-commons
+  - docker-build-step
 

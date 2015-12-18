@@ -1,5 +1,6 @@
 ---
 
+
 - name: Enable Yum repository
   get_url:
     url: "{{ jenkins_repo }}"
@@ -62,6 +63,11 @@
     url: "http://localhost:{{ jenkins_port }}/jnlpJars/jenkins-cli.jar"
     dest: "{{ jenkins_cli_jar }}"
   when: jenkins_cli_file.stat.exists == False
+
+- name: Enable and start Jenkins
+  service:
+    name: jenkins
+    state: stopped
 
 - name: Create deploy user
   user:

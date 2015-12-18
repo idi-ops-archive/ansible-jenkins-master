@@ -12,6 +12,12 @@
 # pluginManager will continue to check for newer version and make them avai-
 # lable through the web interface.
 
+- name: Enable and start Jenkins
+  service:
+    name: jenkins
+    enabled: yes
+    state: started
+
 - name: Get list of currently installed plugins
   shell: "java -jar {{ jenkins_cli_jar }} -s http://localhost:{{ jenkins_port }}/ list-plugins {{ jenkins_admin_credentials }} | awk '{ print $1 }'"
   register: plugin_list
@@ -62,4 +68,58 @@
   file:
     path: "{{ mktemp.stdout }}"
     state: absent
+
+- name: Check if docker package is installed
+  command: rpm -q docker-engine
+  register: docker_pkg
+
+- name: Add Jenkins to docker group
+  user:
+    name: jenkins
+    groups: docker
+    append: yes
+  when: "'docker-commons' in jenkins_plugins and docker_pkg.stdout.find('is not installed') == -1"
+  notify:
+    - restart jenkins
+
+- name: Restart Jenkins to create plugins config files
+  service:
+    name: jenkins
+    state: restarted
+  when: "'docker-commons' in jenkins_plugins and docker_pkg.stdout.find('is not installed') == -1"
+
+- name: Wait for Jenkins to be ready
+  shell: curl -D - --silent http://localhost:8080/cli/
+  register: result
+  until: >
+    ((result.stdout.find("200 OK") != -1) or
+    (result.stdout.find("Authentication required") != -1)) and
+    (result.stdout.find("Please wait while") == -1)
+  retries: "{{ jenkins_conn_retries }}"
+  delay: "{{ jenkins_conn_delay }}"
+  changed_when: false
+
+- name: Check if DockerBuilder xml config file exists
+  stat:
+    path: /var/lib/jenkins/org.jenkinsci.plugins.dockerbuildstep.DockerBuilder.xml
+  register: dockerbuilder_file
+
+- name: Transfer DockerBuilder xml config file
+  copy:
+    src: dockerbuilder.xml
+    dest: /var/lib/jenkins/org.jenkinsci.plugins.dockerbuildstep.DockerBuilder.xml
+    owner: jenkins
+  when:
+    dockerbuilder_file.stat.exists == False and
+    'docker-commons' in jenkins_plugins and
+    docker_pkg.stdout.find('is not installed') == -1
+
+- name: Configure docker plugin
+  xml:
+    file: /var/lib/jenkins/org.jenkinsci.plugins.dockerbuildstep.DockerBuilder.xml
+    xpath: /org.jenkinsci.plugins.dockerbuildstep.DockerBuilder_-DescriptorImpl/dockerUrl
+    value: unix:///var/run/docker.sock
+  when: "'docker-commons' in jenkins_plugins and docker_pkg.stdout.find('is not installed') == -1"
+  notify:
+    - restart jenkins
 
