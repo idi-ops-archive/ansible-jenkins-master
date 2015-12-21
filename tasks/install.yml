@@ -1,0 +1,82 @@
+---
+
+- name: Enable Yum repository
+  get_url:
+    url: "{{ jenkins_repo }}"
+    dest: /etc/yum.repos.d/jenkins.repo
+    force: yes
+
+- name: Import RPM key
+  rpm_key:
+    key: "{{ jenkins_repo_key }}"
+    state: present
+
+- name: Install required packages
+  yum:
+    name: "{{ item }}"
+    state: latest
+  with_items: jenkins_packages
+
+- name: Install required pip packages
+  pip:
+    name: "{{ item }}"
+    state: latest
+  with_items: jenkins_pip_packages
+
+- name: Configure Jenkins startup
+  template:
+    src: sysconfig.j2
+    dest: /etc/sysconfig/jenkins
+
+- name: Create Jenkins auxiliary directory for holding JARs, scripts, etc
+  file:
+    path: "{{ jenkins_aux_dir }}"
+    state: directory
+    owner: root
+    group: root
+
+- name: Enable and start Jenkins
+  service:
+    name: jenkins
+    enabled: yes
+    state: started
+
+- name: Wait for Jenkins to be ready
+  shell: curl -D - --silent http://localhost:8080/cli/
+  register: result
+  until: (result.stdout.find("200 OK") != -1) and (result.stdout.find("Please wait while") == -1)
+  retries: "{{ jenkins_conn_retries }}"
+  delay: "{{ jenkins_conn_delay }}"
+  changed_when: false
+
+- name: Retrieve the jenkins-cli jarfile
+  get_url:
+    url: "http://localhost:{{ jenkins_port }}/jnlpJars/jenkins-cli.jar"
+    dest: "{{ jenkins_cli_jar }}"
+
+- name: Create jenkins_jobs directory
+  file:
+    path: /home/deploy/jenkins_jobs
+    state: directory
+    owner: deploy
+
+- name: Transfer jenkins-jobs configuration (missing token)
+  copy:
+    src: jenkins_jobs.ini
+    dest: /home/deploy/jenkins_jobs.ini
+    owner: deploy
+
+# Workaround against Jenkins downgrading plugins back to bundled versions
+#- name: Restart Jenkins
+#  service:
+#    name: jenkins
+#    state: restarted
+
+#- name: Wait for Jenkins to be ready
+#  shell: curl -D - --silent http://{{ jenkins_hostname }}:8080/cli/
+#  register: result
+#  until: (result.stdout.find("200 OK") != -1) and (result.stdout.find("Please wait while") == -1)
+#  retries: "{{ jenkins_conn_retries }}"
+#  delay: "{{ jenkins_conn_delay }}"
+#  changed_when: false
+

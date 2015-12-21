@@ -1,0 +1,23 @@
+---
+
+jenkins_repo: http://pkg.jenkins-ci.org/redhat/jenkins.repo
+
+jenkins_repo_key: http://pkg.jenkins-ci.org/redhat/jenkins-ci.org.key
+
+jenkins_updates_url: https://updates.jenkins-ci.org
+
+jenkins_packages:
+  - jenkins
+  - java-1.7.0-openjdk
+  - python-httplib2
+  - python-pip
+  - python-virtualenv
+  - libyaml
+  - curl
+  - git
+  - nodejs
+  - nodejs-grunt-cli
+  - npm
+
+jenkins_pip_packages:
+  - jenkins-job-builder
