@@ -1,0 +1,7 @@
+[Unit]
+Description=Generates /etc/sysconfig/jenkins.env file
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/sh -c "/usr/lib/jenkins/jenkins-env > /etc/sysconfig/jenkins.env"
+

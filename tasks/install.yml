@@ -29,6 +29,30 @@
     src: sysconfig.j2
     dest: /etc/sysconfig/jenkins
 
+- name: Remove old upstart startup script
+  file:
+    path: /etc/init.d/jenkins
+    state: absent
+
+- name: Copy jenkins-env script
+  copy:
+    src: jenkins-env
+    dest: /usr/lib/jenkins/jenkins-env
+    mode: 0755
+
+- name: Copy jenkins-env service file
+  copy:
+    src: jenkins-env.service
+    dest: /usr/lib/systemd/system/jenkins-env.service
+
+- name: Copy jenkins service file
+  template:
+    src: jenkins.service.j2
+    dest: /usr/lib/systemd/system/jenkins.service
+
+- name: Reload Systemd
+  command: systemctl daemon-reload
+
 - name: Create Jenkins auxiliary directory for holding JARs, scripts, etc
   file:
     path: "{{ jenkins_aux_dir }}"

@@ -1,0 +1,28 @@
+[Unit]
+Description=Extendable continuous integration server
+After=network.target
+After=jenkins-env.service
+Requires=jenkins-env.service
+
+[Service]
+User={{ jenkins_user }}
+Type=simple
+EnvironmentFile=/etc/sysconfig/jenkins.env
+ExecStart=/bin/java $JENKINS_COMMAND_LINE
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=jenkins
+#MemoryLimit=768M
+OOMScoreAdjust=-1000
+LimitCPU=infinity
+LimitFSIZE=infinity
+LimitDATA=infinity
+LimitCORE=0
+LimitAS=infinity
+LimitLOCKS=infinity
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+
