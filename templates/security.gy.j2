@@ -1,5 +1,6 @@
 import jenkins.model.*
 import hudson.security.*
+import hudson.model.*
 
 def instance = Jenkins.getInstance()
 def hudsonRealm = new HudsonPrivateSecurityRealm({% if jenkins_allow_signups %}true{% else %}false{% endif %})
@@ -14,6 +15,8 @@ instance.setSecurityRealm(hudsonRealm)
 {% for entry in jenkins_admins %}
 strategy.add(Jenkins.ADMINISTER, "{{ entry }}")
 {% endfor %}
+
+strategy.add(Item.READ, "anonymous")
 
 instance.setAuthorizationStrategy(strategy)
 

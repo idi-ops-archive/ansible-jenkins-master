@@ -1,3 +1,26 @@
 ---
 
+- name: Build test jobs definition
+  template:
+    src: test_job.j2
+    dest: "/tmp/test_job_{{ item.key }}.xml"
+  with_dict: jenkins_test_jobs 
+
+- name: Login cli
+  command: "java -jar /opt/jenkins/jenkins-cli.jar -s http://localhost:8080 login --username {{ jenkins_admins[0] }} --password {{ jenkins_initial_password }}"
+
+- name: Create test jobs
+  shell: "java -jar /opt/jenkins/jenkins-cli.jar -s http://localhost:8080 create-job {{ item.key }} < /tmp/test_job_{{ item.key  }}.xml"
+  with_dict: jenkins_test_jobs
+
+- name: Remove test jobs definitions
+  file: path=/tmp/test_job_*.xml state=absent
+
+- name: build test jobs
+  command: "java -jar /opt/jenkins/jenkins-cli.jar -s http://localhost:8080 build {{ item.key }} -s"
+  with_dict: jenkins_test_jobs
+
+- name: remove test jobs
+  command: "java -jar /opt/jenkins/jenkins-cli.jar -s http://localhost:8080 delete-job {{ item.key }}"
+  with_dict: jenkins_test_jobs
 

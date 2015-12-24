@@ -125,23 +125,6 @@
   notify:
     - restart jenkins
 
-- name: Restart Jenkins to create plugins config files
-  service:
-    name: jenkins
-    state: restarted
-  when: "'docker-commons' in jenkins_plugins and docker_pkg.stdout.find('is not installed') == -1"
-
-- name: Wait for Jenkins to be ready
-  shell: curl -D - --silent http://localhost:8080/cli/
-  register: result
-  until: >
-    ((result.stdout.find("200 OK") != -1) or
-    (result.stdout.find("Authentication required") != -1)) and
-    (result.stdout.find("Please wait while") == -1)
-  retries: "{{ jenkins_conn_retries }}"
-  delay: "{{ jenkins_conn_delay }}"
-  changed_when: false
-
 - name: Check if DockerBuilder xml config file exists
   stat:
     path: /var/lib/jenkins/org.jenkinsci.plugins.dockerbuildstep.DockerBuilder.xml
@@ -166,3 +149,26 @@
   notify:
     - restart jenkins
 
+- name: Restart Jenkins to create plugins config files
+  service:
+    name: jenkins
+    state: stopped
+  when: "'docker-commons' in jenkins_plugins and docker_pkg.stdout.find('is not installed') == -1"
+
+- name: Restart Jenkins to create plugins config files
+  service:
+    name: jenkins
+    state: started
+  when: "'docker-commons' in jenkins_plugins and docker_pkg.stdout.find('is not installed') == -1"
+ 
+- name: Wait for Jenkins to be ready
+  shell: curl -D - --silent http://localhost:8080/cli/
+  register: result
+  until: >
+    ((result.stdout.find("200 OK") != -1) or
+    (result.stdout.find("Authentication required") != -1)) and
+    (result.stdout.find("Please wait while") == -1)
+  retries: "{{ jenkins_conn_retries }}"
+  delay: "{{ jenkins_conn_delay }}"
+  changed_when: false
+ 
