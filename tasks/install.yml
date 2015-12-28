@@ -60,38 +60,8 @@
     owner: root
     group: root
 
-- name: Enable and start Jenkins
-  service:
-    name: jenkins
-    enabled: yes
-    state: started
-
-- name: Wait for Jenkins to be ready
-  shell: curl -D - --silent http://localhost:8080/cli/
-  register: result
-  until: >
-    ((result.stdout.find("200 OK") != -1) or
-    (result.stdout.find("Authentication required") != -1)) and
-    (result.stdout.find("Please wait while") == -1)
-  retries: "{{ jenkins_conn_retries }}"
-  delay: "{{ jenkins_conn_delay }}"
-  changed_when: false
-
-- name: Check if we have jenkins_cli already downloaded
-  stat:
-    path: "{{ jenkins_cli_jar }}"
-  register: jenkins_cli_file
-
-- name: Retrieve the jenkins-cli jarfile
-  get_url:
-    url: "http://localhost:{{ jenkins_port }}/jnlpJars/jenkins-cli.jar"
-    dest: "{{ jenkins_cli_jar }}"
-  when: jenkins_cli_file.stat.exists == False
-
-- name: Enable and start Jenkins
-  service:
-    name: jenkins
-    state: stopped
+- name: Extract the jenkins_cli jarfile
+  command: unzip -oj /usr/lib/jenkins/jenkins.war WEB-INF/jenkins-cli.jar -d /opt/jenkins/
 
 - name: Create deploy user
   user:

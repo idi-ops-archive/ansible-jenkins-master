@@ -16,6 +16,7 @@ jenkins_packages:
   - nodejs
   - nodejs-grunt-cli
   - npm
+  - unzip
 
 jenkins_pip_packages:
   - jenkins-job-builder
