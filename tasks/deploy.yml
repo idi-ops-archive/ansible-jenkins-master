@@ -1,3 +1,16 @@
 ---
 
 
+- name: Enable and start Jenkins (Systemd)
+  service:
+    name: jenkins
+    enabled: yes
+    state: started
+  when: not is_docker
+
+- name: Enable Jenkins (Supervisord)
+  template:
+    src: supervisord-jenkins.ini.j2
+    dest: /etc/supervisord/jenkins.ini
+  when: is_docker
+

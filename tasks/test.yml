@@ -1,5 +1,15 @@
 ---
-
+- name: Wait for Jenkins to be ready
+  shell: curl -D - --silent http://localhost:8080/cli/
+  register: result
+  until: >
+    ((result.stdout.find("200 OK") != -1) or
+    (result.stdout.find("Authentication required") != -1)) and
+    (result.stdout.find("Please wait while") == -1)
+  retries: "{{ jenkins_conn_retries }}"
+  delay: "{{ jenkins_conn_delay }}"
+  changed_when: false
+ 
 - name: Login cli
   command: "java -jar /opt/jenkins/jenkins-cli.jar -s http://localhost:8080 login --username {{ jenkins_admins[0] }} --password {{ jenkins_initial_password }}"
  

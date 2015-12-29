@@ -1,0 +1,12 @@
+[program:jenkins]
+
+command=/bin/java {{ jenkins_java_options }} -DJENKINS_HOME={{ /var/lib/jenkins }} -jar /usr/lib/jenkins/jenkins.war --webroot=/var/cache/jenkins/war --httpPort={{ jenkins_port }} --httpListenAddress={{ jenkins_listen_address }} --ajp13Port=-1 --debug={{ jenkins_debug_level }} --handlerCountMax={{ jenkins_handler_max }} --handlerCountMaxIdle={{ jenkins_handler_idle }}
+
+user={{ jenkins_user }}
+
+directory={{ jenkins_home }}
+autorestart=true
+redirect_stderr=true
+stdout_logfile=/dev/stdout
+stdout_logfile_maxbytes=0
+

@@ -24,11 +24,6 @@
     state: latest
   with_items: jenkins_pip_packages
 
-- name: Configure Jenkins startup
-  template:
-    src: sysconfig.j2
-    dest: /etc/sysconfig/jenkins
-
 - name: Remove old upstart startup script
   file:
     path: /etc/init.d/jenkins
@@ -39,45 +34,21 @@
     src: jenkins-env
     dest: /usr/lib/jenkins/jenkins-env
     mode: 0755
+  when: not is_docker
 
 - name: Copy jenkins-env service file
   copy:
     src: jenkins-env.service
     dest: /usr/lib/systemd/system/jenkins-env.service
+  when: not is_docker
 
 - name: Copy jenkins service file
   template:
     src: jenkins.service.j2
     dest: /usr/lib/systemd/system/jenkins.service
+  when: not is_docker
 
 - name: Reload Systemd
   command: systemctl daemon-reload
-
-- name: Create Jenkins auxiliary directory for holding JARs, scripts, etc
-  file:
-    path: "{{ jenkins_aux_dir }}"
-    state: directory
-    owner: root
-    group: root
-
-- name: Extract the jenkins_cli jarfile
-  command: unzip -oj /usr/lib/jenkins/jenkins.war WEB-INF/jenkins-cli.jar -d /opt/jenkins/
-
-- name: Create deploy user
-  user:
-    name: deploy
-    state: present
-
-- name: Create jenkins_jobs directory
-  file:
-    path: /home/deploy/jenkins_jobs
-    state: directory
-    owner: deploy
-
-- name: Transfer jenkins-jobs configuration (missing token)
-  copy:
-    src: jenkins_jobs.ini
-    dest: /home/deploy/jenkins_jobs.ini
-    owner: deploy
-
+  when: not is_docker
 

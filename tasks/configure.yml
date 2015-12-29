@@ -12,11 +12,61 @@
 # pluginManager will continue to check for newer version and make them avai-
 # lable through the web interface.
 
+- name: Create Jenkins auxiliary directory for holding JARs, scripts, etc
+  file:
+    path: "{{ jenkins_aux_dir }}"
+    state: directory
+    owner: root
+    group: root
+
+- name: Extract the jenkins_cli jarfile
+  command: unzip -oj /usr/lib/jenkins/jenkins.war WEB-INF/jenkins-cli.jar -d /opt/jenkins/
+
+- name: Create deploy user
+  user:
+    name: deploy
+    state: present
+
+- name: Create jenkins_jobs directory
+  file:
+    path: /home/deploy/jenkins_jobs
+    state: directory
+    owner: deploy
+
+- name: Transfer jenkins-jobs configuration (missing token)
+  copy:
+    src: jenkins_jobs.ini
+    dest: /home/deploy/jenkins_jobs.ini
+    owner: deploy
+
+
+- name: Configure Jenkins startup
+  template:
+    src: sysconfig.j2
+    dest: /etc/sysconfig/jenkins
+  when: not is_docker
+
 - name: Enable and start Jenkins
   service:
     name: jenkins
-    enabled: yes
     state: started
+  when: not is_docker
+
+- name: Start Jenkins (Docker)
+  command: >
+    su - {{ jenkins_user }}
+    -c /bin/java {{ jenkins_java_options }}
+    -DJENKINS_HOME={{ /var/lib/jenkins }}
+    -jar /usr/lib/jenkins/jenkins.war
+    --webroot=/var/cache/jenkins/war
+    --httpPort={{ jenkins_port }}
+    --httpListenAddress={{ jenkins_listen_address }}
+    --ajp13Port=-1
+    --daemon
+    --debug={{ jenkins_debug_level }}
+    --handlerCountMax={{ jenkins_handler_max }}
+    --handlerCountMaxIdle={{ jenkins_handler_idle }}
+  when: is_docker
 
 - name: Wait for Jenkins to be ready
   shell: curl -D - --silent http://localhost:8080/cli/
@@ -112,4 +162,9 @@
     path: "{{ mktemp.stdout }}"
     state: absent
 
+- name: Stop Jenkins (end of configure step)
+  service:
+    name: jenkins
+    state: stopped
+  when: not is_docker
 
