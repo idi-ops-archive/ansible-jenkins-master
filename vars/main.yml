@@ -13,23 +13,8 @@ jenkins_packages:
   - python-pip
   - curl
   - git
-  - nodejs
-  - nodejs-grunt-cli
-  - npm
   - unzip
 
 jenkins_pip_packages:
   - jenkins-job-builder
 
-jenkins_test_jobs:
-  universal:
-    jenkins_job_projecturl: "http://github.com/gpii-ops/docker-universal/"
-    jenkins_job_git_url: "http://github.com/gpii-ops/docker-universal.git"
-    jenkins_job_git_branch: "d8cd67bc0bca0b01dc243383d6b9a460321c8291"
-    jenkins_job_imagetag: "test:gpii/universal:d8cd67bc"
-  preferences-server:
-    jenkins_job_projecturl: "http://github.com/gpii-ops/docker-preferences-server/"
-    jenkins_job_git_url: "http://github.com/gpii-ops/docker-preferences-server.git"
-    jenkins_job_git_branch: "a533e70f6a163ff109bdb22dd962c8c34c8c8ac1"
-    jenkins_job_imagetag: "test:gpii/preferences-server:a533e70f"
- 

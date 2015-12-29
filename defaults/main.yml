@@ -43,6 +43,4 @@ jenkins_plugins:
   - global-post-script
   - tap
   - authentication-tokens
-  - docker-commons
-  - docker-build-step
 
