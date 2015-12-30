@@ -82,35 +82,13 @@
   shell: "java -jar {{ jenkins_cli_jar }} -s http://{{ jenkins_listen_address }}:{{ jenkins_port }}/ list-plugins | awk '{ print $1 }'"
   register: plugin_list
 
-- name: Install additional plugins and update everything
-  get_url:
-    dest: "{{ jenkins_home }}/plugins/{{ item }}.jpi"
-    url: "{{ jenkins_updates_url }}/latest/{{ item }}.hpi"
-    force: yes
-    owner: "{{ jenkins_user }}"
-  when: not plugin_list.stderr
-  with_items:
-    - "{{ plugin_list.stdout_lines }}"
-    - "{{ jenkins_plugins }}"
-  notify:
-    - restart jenkins
-
-- name: Pin all plugins to avoid bundled versions getting reinstalled
-  file:
-    path: "{{ jenkins_home }}/plugins/{{ item }}.jpi.pinned"
-    state: touch
-    owner: "{{ jenkins_user }}"
-  when: not plugin_list.stderr
-  with_items:
-    - "{{ plugin_list.stdout_lines }}"
-    - "{{ jenkins_plugins }}"
-  notify:
-    - restart jenkins
-
 - name: Get list of currently installed plugins (with credentials)
   shell: "java -jar {{ jenkins_cli_jar }} -s http://{{ jenkins_listen_address  }}:{{ jenkins_port }}/ list-plugins {{ jenkins_admin_credentials }} | awk '{ print $1 }'"
   register: plugin_list_credentials
   when: plugin_list.stderr
+ 
+- debug: var=plugin_list
+- debug: var=plugin_list_credentials
 
 - name: Install additional plugins and update everything
   get_url:
@@ -118,10 +96,11 @@
     url: "{{ jenkins_updates_url }}/latest/{{ item }}.hpi"
     force: yes
     owner: "{{ jenkins_user }}"
-  when: plugin_list_credentials.stdout_lines is defined
   with_items:
-    - "{{ plugin_list_credentials.stdout_lines }}"
+    - "{{ plugin_list.stdout_lines | default([]) }}"
+    - "{{ plugin_list_credentials.stdout_lines | default([]) }}"
     - "{{ jenkins_plugins }}"
+  register: plugin_install
   notify:
     - restart jenkins
 
@@ -130,10 +109,11 @@
     path: "{{ jenkins_home }}/plugins/{{ item }}.jpi.pinned"
     state: touch
     owner: "{{ jenkins_user }}"
-  when: plugin_list_credentials.stdout_lines is defined
   with_items:
-    - "{{ plugin_list_credentials.stdout_lines }}"
+    - "{{ plugin_list.stdout_lines | default([]) }}"
+    - "{{ plugin_list_credentials.stdout_lines | default([]) }}"
     - "{{ jenkins_plugins }}"
+  when: plugin_install.changed
   notify:
     - restart jenkins
 
