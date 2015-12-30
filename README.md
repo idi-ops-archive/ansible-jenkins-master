@@ -9,6 +9,13 @@ At the moment of installation, the hostname you pass through jenkins_hostname mu
 
 Ideally, Jenkins should be listening only to localhost (127.0.0.1) while nginx or some other web server acts as a frontend.
 
+The role uses the following [Ansible tags](http://docs.ansible.com/ansible/playbooks_tags.html) to control the provisioning process:
+
+* ``install`` - install software using package managers and (not recommended) using source 
+* ``configure`` - add user accounts, groups, make filesystem related changes, clone git repositories, run application commands, etc.
+* ``deploy`` - enable and restart a Systemd unit if a VM or physical machine is being used or in the case of Docker, add a Supervisor config
+* ``test`` - check the application's HTTP endpoint for a response to confirm it is working
+
 Requirements
 ------------
 
@@ -17,33 +24,7 @@ None
 Role Variables
 --------------
 
-    jenkins_listen_address: 127.0.0.1
-    jenkins_hostname: localhost
-    jenkins_port: 8080
-    
-    jenkins_handler_max: 100
-    jenkins_handler_idle: 20
-    
-    jenkins_allow_signups: false
-    
-    jenkins_admins:         # format: [ username, password ]
-      - ['admin','admin']
-    
-    jenkins_cli_jar: /opt/jenkins/jenkins-cli.jar
-    jenkins_home: /var/lib/jenkins
-    jenkins_java_cmd: ''
-    jenkins_user: jenkins
-    jenkins_java_options: "-Djava.awt.headless=true"
-    jenkins_debug_level: 5
-    jenkins_access_log: no
-    jenkins_args: ''
-    
-    jenkins_conn_retries: 60
-    jenkins_conn_delay: 10
-    
-    jenkins_plugins:
-      - git-client 
-      - git
+Please refer to the [defaults/main.yml](defaults/main.yml) file for a list of variables along with additional documentation.
 
 Example Playbook
 ----------------
@@ -75,4 +56,5 @@ Author Information
 ------------------
 
 Created by [Giovanni Tirloni](http://gtirloni.com)
+Some changes by [Alfredo Matas](http://www.alfredomatas.es)
 
