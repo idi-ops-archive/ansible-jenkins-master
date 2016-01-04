@@ -87,9 +87,6 @@
   register: plugin_list_credentials
   when: plugin_list.stderr
  
-- debug: var=plugin_list
-- debug: var=plugin_list_credentials
-
 - name: Install additional plugins and update everything
   get_url:
     dest: "{{ jenkins_home }}/plugins/{{ item }}.jpi"
