@@ -1,6 +1,8 @@
 ---
+
+
 - name: Wait for Jenkins to be ready
-  shell: curl -D - --silent http://localhost:8080/cli/
+  shell: "curl -D - --silent http://{{ jenkins_listen_address }}:{{ jenkins_port }}/cli/"
   register: result
   until: >
     ((result.stdout.find("200 OK") != -1) or
