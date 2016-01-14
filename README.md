@@ -62,6 +62,6 @@ MIT
 Author Information
 ------------------
 
-* Created by [Giovanni Tirloni](http://gtirloni.com)
-* Some changes by [Alfredo Matas](http://www.alfredomatas.es)
+* Inclusive Design Research Centre (OCAD University)
+* Raising the floor - International
 
