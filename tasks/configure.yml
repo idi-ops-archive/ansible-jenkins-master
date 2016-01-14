@@ -25,7 +25,7 @@
 - name: Transfer jenkins-jobs configuration (missing token)
   copy:
     src: jenkins_jobs.ini
-    dest: /var/lib/jenkins/jenkins_jobs.ini
+    dest: {{ jenkins_home }}/jenkins_jobs.ini
     owner: jenkins
     mode: 0640
 
@@ -45,7 +45,7 @@
   command: >
     su - {{ jenkins_user }}
     -c /bin/java {{ jenkins_java_options }}
-    -DJENKINS_HOME={{ /var/lib/jenkins }}
+    -DJENKINS_HOME={{ jenkins_home }}
     -jar /usr/lib/jenkins/jenkins.war
     --webroot=/var/cache/jenkins/war
     --httpPort={{ jenkins_port }}
