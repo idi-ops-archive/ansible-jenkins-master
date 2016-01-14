@@ -31,26 +31,29 @@ Please refer to the [defaults/main.yml](defaults/main.yml) file for a list of va
 Example Playbook
 ----------------
 
-    ---
-    - name: Configure Jenkins test server
-      hosts: localhost
+```
+---
 
-      roles:
 
-	- role: ansible-facts
-        - role: ansible-jenkins
-          jenkins_hostname: localhost
-	  jenkins_port: 8080
-	  jenkins_initial_password: 'test'
-          jenkins_admins:
-            - 'user1'
-            - 'user2'
-          jenkins_plugins:
-            - git-client
-            - git
-            - publish-over-ssh
-            - nodejs
+- name: Configure Jenkins test server
+  hosts: localhost
 
+  roles:
+    - role: facts
+    - role: jenkins
+        jenkins_hostname: localhost
+        jenkins_port: 8080
+        jenkins_initial_password: 'test'
+        jenkins_admins:
+          - 'user1'
+          - 'user2'
+        jenkins_plugins:
+          - git-client
+          - git
+          - publish-over-ssh
+          - nodejs
+
+```
 License
 -------
 
