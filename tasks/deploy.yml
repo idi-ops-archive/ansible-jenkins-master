@@ -1,6 +1,5 @@
 ---
 
-
 - name: Enable and start Jenkins (Systemd)
   service:
     name: jenkins

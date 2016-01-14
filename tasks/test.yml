@@ -1,6 +1,5 @@
 ---
 
-
 - name: Wait for Jenkins to be ready
   shell: "curl -D - --silent http://{{ jenkins_listen_address }}:{{ jenkins_port }}/cli/"
   register: result

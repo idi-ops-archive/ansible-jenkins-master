@@ -1,6 +1,5 @@
 ---
 
-
 - name: Enable Yum repository
   get_url:
     url: "{{ jenkins_repo }}"
