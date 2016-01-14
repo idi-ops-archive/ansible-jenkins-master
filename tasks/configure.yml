@@ -22,22 +22,12 @@
 - name: Extract the jenkins_cli jarfile
   command: unzip -oj /usr/lib/jenkins/jenkins.war WEB-INF/jenkins-cli.jar -d /opt/jenkins/
 
-- name: Create deploy user
-  user:
-    name: deploy
-    state: present
-
-- name: Create jenkins_jobs directory
-  file:
-    path: /home/deploy/jenkins_jobs
-    state: directory
-    owner: deploy
-
 - name: Transfer jenkins-jobs configuration (missing token)
   copy:
     src: jenkins_jobs.ini
-    dest: /home/deploy/jenkins_jobs.ini
-    owner: deploy
+    dest: /var/lib/jenkins/jenkins_jobs.ini
+    owner: jenkins
+    mode: 0640
 
 - name: Configure Jenkins startup
   template:
