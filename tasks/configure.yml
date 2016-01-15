@@ -25,7 +25,7 @@
 - name: Transfer jenkins-jobs configuration (missing token)
   copy:
     src: jenkins_jobs.ini
-    dest: {{ jenkins_home }}/jenkins_jobs.ini
+    dest: "{{ jenkins_home }}/jenkins_jobs.ini"
     owner: jenkins
     mode: 0640
 
