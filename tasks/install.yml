@@ -28,19 +28,6 @@
     path: /etc/init.d/jenkins
     state: absent
 
-- name: Copy jenkins-env script
-  copy:
-    src: jenkins-env
-    dest: /usr/lib/jenkins/jenkins-env
-    mode: 0755
-  when: not is_docker
-
-- name: Copy jenkins-env service file
-  copy:
-    src: jenkins-env.service
-    dest: /usr/lib/systemd/system/jenkins-env.service
-  when: not is_docker
-
 - name: Copy jenkins service file
   template:
     src: jenkins.service.j2

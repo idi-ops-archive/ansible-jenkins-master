@@ -1,14 +1,12 @@
 [Unit]
 Description=Extendable continuous integration server
 After=network.target
-After=jenkins-env.service
-Requires=jenkins-env.service
 
 [Service]
 User={{ jenkins_user }}
 Type=simple
-EnvironmentFile=/etc/sysconfig/jenkins.env
-ExecStart=/bin/java $JENKINS_COMMAND_LINE
+EnvironmentFile=/etc/sysconfig/jenkins
+ExecStart={{ jenkins_java_cmd }} $JENKINS_JAVA_OPTIONS $JENKINS_HOME -jar $JENKINS_WAR $JENKINS_LOGFILE $JENKINS_WEBROOT $JENKINS_PORT $JENKINS_LISTEN_ADDRESS $JENKINS_HTTPS_PORT $JENKINS_HTTPS_KEYSTORE $JENKINS_HTTPS_KEYSTORE_PASSWORD $JENKINS_HTTPS_LISTEN_ADDRESS $JENKINS_AJP_PORT $JENKINS_AJP_LISTEN_ADDRESS $JENKINS_DEBUG_LEVEL $JENKINS_HANDLER_STARTUP $JENKINS_HANDLER_MAX $JENKINS_HANDLER_IDLE $JENKINS_ARGS $JENKINS_ENABLE_ACCESS_LOG
 StandardOutput=syslog
 StandardError=syslog
 SyslogIdentifier=jenkins

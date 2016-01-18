@@ -16,7 +16,7 @@ jenkins_admin_credentials: "--username {{ jenkins_admins[0] }} --password {{ jen
 jenkins_aux_dir: /opt/jenkins
 jenkins_cli_jar: /opt/jenkins/jenkins-cli.jar
 jenkins_home: /var/lib/jenkins
-jenkins_java_cmd: ''
+jenkins_java_cmd: '/bin/java'
 jenkins_user: jenkins
 jenkins_java_options: "-Djava.awt.headless=true"
 jenkins_debug_level: 5
