@@ -106,6 +106,8 @@ JENKINS_WEBROOT="--webroot=/var/cache/jenkins/war"
 #
 {% if jenkins_port is defined %}
 JENKINS_PORT="--httpPort={{ jenkins_port }}"
+{% else %}
+#JENKINS_PORT=
 {% endif %}
 
 ## Type:        string
@@ -117,6 +119,8 @@ JENKINS_PORT="--httpPort={{ jenkins_port }}"
 #
 {% if jenkins_listen_address is defined %}
 JENKINS_LISTEN_ADDRESS="--httpListenAddress={{ jenkins_listen_address }}"
+{% else %}
+#JENKINS_LISTEN_ADDRESS=
 {% endif %}
 
 ## Type:        integer(0:65535)
@@ -128,6 +132,8 @@ JENKINS_LISTEN_ADDRESS="--httpListenAddress={{ jenkins_listen_address }}"
 #
 {% if jenkins_https_port is defined %}
 JENKINS_HTTPS_PORT="--httpsPort={{ jenkins_https_port }}"
+{% else %}
+#JENKINS_HTTPS_PORT=
 {% endif %}
 
 ## Type:        string
@@ -139,6 +145,8 @@ JENKINS_HTTPS_PORT="--httpsPort={{ jenkins_https_port }}"
 #
 {% if jenkins_https_keystore is defined %}
 JENKINS_HTTPS_KEYSTORE="--httpsKeyStore={{ jenkins_https_keystore }}"
+{% else %}
+#JENKINS_HTTPS_KEYSTORE=
 {% endif %}
 
 ## Type:        string
@@ -150,6 +158,8 @@ JENKINS_HTTPS_KEYSTORE="--httpsKeyStore={{ jenkins_https_keystore }}"
 #
 {% if jenkins_https_keystore_password is defined %}
 JENKINS_HTTPS_KEYSTORE_PASSWORD="--httpsKeyStorePassword='{{jenkins_https_keystore_password}}'"
+{% else %}
+#JENKINS_HTTPS_KEYSTORE_PASSWORD=
 {% endif %}
 
 ## Type:        string
@@ -161,6 +171,8 @@ JENKINS_HTTPS_KEYSTORE_PASSWORD="--httpsKeyStorePassword='{{jenkins_https_keysto
 #
 {% if jenkins_https_listen_address is defined %}
 JENKINS_HTTPS_LISTEN_ADDRESS="--httpsListenAddress={{ jenkins_https_listen_address }}"
+{% else %}
+#JENKINS_HTTPS_LISTEN_ADDRESS=
 {% endif %}
 
 ## Type:        integer(0:65535)
@@ -185,6 +197,8 @@ JENKINS_AJP_PORT="--ajp13Port=-1"
 #
 {% if jenkins_ajp_listen_address is defined %}
 JENKINS_AJP_LISTEN_ADDRESS="--ajp13ListenAddress={{ jenkins_ajp_listen_address }}"
+{% else %}
+#JENKINS_AJP_LISTEN_ADDRESS=
 {% endif %}
 
 ## Type:        integer(1:9)
@@ -196,6 +210,8 @@ JENKINS_AJP_LISTEN_ADDRESS="--ajp13ListenAddress={{ jenkins_ajp_listen_address }
 #
 {% if jenkins_debug_level is defined %}
 JENKINS_DEBUG_LEVEL="--debug={{ jenkins_debug_level }}"
+{% else %}
+#JENKINS_DEBUG_LEVEL=
 {% endif %}
 
 ## Type:        yesno
@@ -206,6 +222,8 @@ JENKINS_DEBUG_LEVEL="--debug={{ jenkins_debug_level }}"
 #
 {% if jenkins_access_log is defined %}
 JENKINS_ENABLE_ACCESS_LOG="--accessLoggerClassName=winstone.accesslog.SimpleAccessLogger --simpleAccessLogger.format=combined --simpleAccessLogger.file={{ jenkins_access_log_file|default('/var/log/jenkins/access_log') }}"
+{% else %}
+#JENKINS_ENABLE_ACCESS_LOG=
 {% endif %}
 
 ## Type:        integer
@@ -216,6 +234,8 @@ JENKINS_ENABLE_ACCESS_LOG="--accessLoggerClassName=winstone.accesslog.SimpleAcce
 #
 {% if jenkins_handler_max is defined %}
 JENKINS_HANDLER_MAX="--handlerCountMax={{ jenkins_handler_max }}"
+{% else %}
+#JENKINS_HANDLER_MAX=
 {% endif %}
 
 ## Type:        integer
@@ -226,10 +246,14 @@ JENKINS_HANDLER_MAX="--handlerCountMax={{ jenkins_handler_max }}"
 #
 {% if jenkins_handler_idle is defined %}
 JENKINS_HANDLER_IDLE="--handlerCountMaxIdle={{ jenkins_handler_idle }}"
+{% else %}
+#JENKINS_HANDLER_IDLE=
 {% endif %}
 
 {% if jenkins_handler_startup is defined %}
 JENKINS_HANDLER_STARTUP="--handlerCountStartup={{ jenkins_handler_startup }}"
+{% else %}
+#JENKINS_HANDLER_STARTUP=
 {% endif %}
  
 ## Type:        string
