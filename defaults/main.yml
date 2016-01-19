@@ -27,20 +27,38 @@ jenkins_conn_retries: 60
 jenkins_conn_delay: 10
 
 jenkins_plugins:
-  - mapdb-api
-  - scm-api
-  - token-macro
-  - plain-credentials
-  - build-timeout
-  - git-client
-  - git
-  - github
-  - github-api
-  - multiple-scms
-  - publish-over-ssh
-  - ssh
-  - greenballs
-  - global-post-script
-  - tap
-  - authentication-tokens
+  ant: "1.2"
+  antisamy-markup-formatter: "1.3"
+  authentication-tokens: "1.2"
+  build-timeout: "1.15.1"
+  credentials: "1.24"
+  cvs: "2.12"
+  external-monitor-job: "1.4"
+  git: "2.4.1"
+  git-client: "1.19.1"
+  github: "1.16.0"
+  github-api: "1.71"
+  global-post-script: "1.1.0"
+  greenballs: "1.15"
+  javadoc: "1.3"
+  junit: "1.10"
+  ldap: "1.11"
+  mailer: "1.16"
+  mapdb-api: "1.0.6.0"
+  matrix-auth: "1.2"
+  matrix-project: "1.6"
+  maven-plugin: "2.12.1"
+  multiple-scms: "0.5"
+  pam-auth: "1.2"
+  plain-credentials: "1.1"
+  publish-over-ssh: "1.13"
+  scm-api: "1.0"
+  script-security: "1.15"
+  ssh: "2.4"
+  ssh-credentials: "1.11"
+  ssh-slaves: "1.10"
+  subversion: "2.5.7"
+  tap: "1.24"
+  token-macro: "1.12.1"
+  translation: "1.12"
 

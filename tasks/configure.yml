@@ -68,38 +68,23 @@
   delay: "{{ jenkins_conn_delay }}"
   changed_when: false
 
-- name: Get list of currently installed plugins (anonymous)
-  shell: "java -jar {{ jenkins_cli_jar }} -s http://{{ jenkins_listen_address }}:{{ jenkins_port }}/ list-plugins | awk '{ print $1 }'"
-  register: plugin_list
-
-- name: Get list of currently installed plugins (with credentials)
-  shell: "java -jar {{ jenkins_cli_jar }} -s http://{{ jenkins_listen_address  }}:{{ jenkins_port }}/ list-plugins {{ jenkins_admin_credentials }} | awk '{ print $1 }'"
-  register: plugin_list_credentials
-  when: plugin_list.stderr
- 
 - name: Install additional plugins and update everything
   get_url:
-    dest: "{{ jenkins_home }}/plugins/{{ item }}.jpi"
-    url: "{{ jenkins_updates_url }}/latest/{{ item }}.hpi"
+    dest: "{{ jenkins_home }}/plugins/{{ item.key }}.jpi"
+    url: "{{ jenkins_updates_url }}/download/plugins/{{ item.key }}/{{ item.value }}/{{ item.key }}.hpi"
     force: yes
     owner: "{{ jenkins_user }}"
-  with_items:
-    - "{{ plugin_list.stdout_lines | default([]) }}"
-    - "{{ plugin_list_credentials.stdout_lines | default([]) }}"
-    - "{{ jenkins_plugins }}"
+  with_dict: "{{ jenkins_plugins }}"
   register: plugin_install
   notify:
     - restart jenkins
 
 - name: Pin all plugins to avoid bundled versions getting reinstalled
   file:
-    path: "{{ jenkins_home }}/plugins/{{ item }}.jpi.pinned"
+    path: "{{ jenkins_home }}/plugins/{{ item.key }}.jpi.pinned"
     state: touch
     owner: "{{ jenkins_user }}"
-  with_items:
-    - "{{ plugin_list.stdout_lines | default([]) }}"
-    - "{{ plugin_list_credentials.stdout_lines | default([]) }}"
-    - "{{ jenkins_plugins }}"
+  with_dict: "{{ jenkins_plugins }}"
   when: plugin_install.changed
   notify:
     - restart jenkins
