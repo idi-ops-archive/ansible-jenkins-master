@@ -1,0 +1,32 @@
+---
+
+- name: Waiting for port listening
+  wait_for: 
+    host: "{{ jenkins_listen_address }}"
+    port: "{{ jenkins_port }}"
+
+- name: Wait for Jenkins to be ready
+  uri: 
+    url: "http://{{ jenkins_listen_address }}:{{ jenkins_port }}/cli/"
+    return_content: yes
+    status_code: "200,403,401,503"
+  register: result
+  until: >
+    ((result.status == 200) or
+    (result.content.find("Authentication required") != -1)) and
+    (result.content.find("Please wait while") == -1)
+  retries: "{{ jenkins_conn_retries }}"
+  delay: "{{ jenkins_conn_delay }}"
+  changed_when: false
+ 
+- name: Login cli
+  command: "java -jar /opt/jenkins/jenkins-cli.jar -s http://localhost:8080 login --username {{ jenkins_admins[0] }} --password {{ jenkins_initial_password }}"
+ 
+- name: Get list of currently installed plugins
+  shell: "java -jar {{ jenkins_cli_jar }} -s http://localhost:{{ jenkins_port }}/ list-plugins | awk '{ print $1 }'"
+  register: plugin_list
+ 
+- name: Check if plugin list is retrieved
+  fail: msg="Could not retrieve plugin list"
+  when: (plugin_list.stderr is defined) and (plugin_list.stderr != "")
+

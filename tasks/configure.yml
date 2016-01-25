@@ -1,0 +1,129 @@
+---
+
+# Jenkins comes with bundled plugins that get priority during deployment. This
+# means that any newer version of a bundled plugin that gets downloaded to
+# ~/plugins will be ignored and replaced with the bundled version the next
+# time Jenkins is restarted.
+#
+# A workaround is to download a newer version and pin it (create a .pinned
+# file). In this case Jenkins will not atempt to overwrite the newer version.
+#
+# Pinning a plugin does not mean that newer versions will get ignored. The
+# pluginManager will continue to check for newer version and make them avai-
+# lable through the web interface.
+
+- name: Create Jenkins auxiliary directory for holding JARs, scripts, etc
+  file:
+    path: "{{ jenkins_aux_dir }}"
+    state: directory
+    owner: root
+    group: root
+
+- name: Extract the jenkins_cli jarfile
+  command: unzip -oj /usr/lib/jenkins/jenkins.war WEB-INF/jenkins-cli.jar -d /opt/jenkins/
+
+- name: Transfer jenkins-jobs configuration (missing token)
+  copy:
+    src: jenkins_jobs.ini
+    dest: "{{ jenkins_home }}/jenkins_jobs.ini"
+    owner: jenkins
+    mode: 0640
+
+- name: Configure Jenkins startup
+  template:
+    src: sysconfig.j2
+    dest: /etc/sysconfig/jenkins
+  when: not is_docker
+
+- name: Enable and start Jenkins
+  service:
+    name: jenkins
+    state: started
+  when: not is_docker
+
+- name: Start Jenkins (Docker)
+  command: >
+    su - {{ jenkins_user }}
+    -c /bin/java {{ jenkins_java_options }}
+    -DJENKINS_HOME={{ jenkins_home }}
+    -jar /usr/lib/jenkins/jenkins.war
+    --webroot=/var/cache/jenkins/war
+    --httpPort={{ jenkins_port }}
+    --httpListenAddress={{ jenkins_listen_address }}
+    --ajp13Port=-1
+    --daemon
+    --debug={{ jenkins_debug_level }}
+    --handlerCountMax={{ jenkins_handler_max }}
+    --handlerCountMaxIdle={{ jenkins_handler_idle }}
+  when: is_docker
+
+- name: Waiting for port listening
+  wait_for: 
+    host: "{{ jenkins_listen_address }}"
+    port: "{{ jenkins_port }}"
+
+- name: Wait for Jenkins to be ready
+  uri: 
+    url: "http://{{ jenkins_listen_address }}:{{ jenkins_port }}/cli/"
+    return_content: yes
+    status_code: "200,403,401,503"
+  register: result
+  until: >
+    ((result.status == 200) or
+    (result.content.find("Authentication required") != -1)) and
+    (result.content.find("Please wait while") == -1)
+  retries: "{{ jenkins_conn_retries }}"
+  delay: "{{ jenkins_conn_delay }}"
+  changed_when: false
+
+- name: Install additional plugins and update everything
+  get_url:
+    dest: "{{ jenkins_home }}/plugins/{{ item.key }}.jpi"
+    url: "{{ jenkins_updates_url }}/download/plugins/{{ item.key }}/{{ item.value }}/{{ item.key }}.hpi"
+    force: yes
+    owner: "{{ jenkins_user }}"
+  with_dict: "{{ jenkins_plugins }}"
+  register: plugin_install
+  notify:
+    - restart jenkins
+
+- name: Pin all plugins to avoid bundled versions getting reinstalled
+  file:
+    path: "{{ jenkins_home }}/plugins/{{ item.key }}.jpi.pinned"
+    state: touch
+    owner: "{{ jenkins_user }}"
+  with_dict: "{{ jenkins_plugins }}"
+  when: plugin_install.changed
+  notify:
+    - restart jenkins
+
+- name: Generate temporary file
+  command: /usr/bin/mktemp
+  register: mktemp
+
+- name: Transfer Groovy script used for security configuration
+  template:
+    src: security.gy.j2
+    dest: "{{ mktemp.stdout }}"
+    backup: no
+
+- name: Enable matrix-based security and create administrators
+  shell: "java -jar {{ jenkins_cli_jar }} -s http://{{ jenkins_listen_address  }}:{{ jenkins_port}}/ groovy {{ mktemp.stdout }}"
+  register: jenkins_security
+  ignore_errors: True
+
+- name: Enable matrix-based security and create administrators
+  shell: "java -jar {{ jenkins_cli_jar }} -s http://{{ jenkins_listen_address  }}:{{ jenkins_port}}/ groovy {{ mktemp.stdout }} {{ jenkins_admin_credentials }}"
+  when: jenkins_security.stderr.find("hudson.security.AccessDeniedException2") != -1
+
+- name: Remove Groovy script
+  file:
+    path: "{{ mktemp.stdout }}"
+    state: absent
+
+- name: Stop Jenkins (end of configure step)
+  service:
+    name: jenkins
+    state: stopped
+  when: not is_docker
+

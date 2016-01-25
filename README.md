@@ -9,64 +9,59 @@ At the moment of installation, the hostname you pass through jenkins_hostname mu
 
 Ideally, Jenkins should be listening only to localhost (127.0.0.1) while nginx or some other web server acts as a frontend.
 
+The role uses the following [Ansible tags](http://docs.ansible.com/ansible/playbooks_tags.html) to control the provisioning process:
+
+* ``install`` - installs Jenkins software using package managers and startup files if necessary
+* ``configure`` - sets up Jenkins cli command, adds the ``deploy`` user to use with [Jenkins job builder] (http://docs.openstack.org/infra/jenkins-job-builder/), updates existing plugins and install the plugins listed in the variable ``jenkins_plugins`` and finally sets the permissions usign a Groovy script.
+* ``deploy`` - enable and start a Systemd unit if a VM or physical machine is being used or in the case of Docker, add a Supervisor config
+* ``test`` - check the application's HTTP endpoint for a response to confirm it is working and check if Jenkins is working pulling the list of plugins using Jenkins-cli.
+
 Requirements
 ------------
 
-None
+* [Ansible facts](https://github.com/idi-ops/ansible-facts)
 
 Role Variables
 --------------
 
-    jenkins_listen_address: 127.0.0.1
-    jenkins_hostname: localhost
-    jenkins_port: 8080
-    
-    jenkins_handler_max: 100
-    jenkins_handler_idle: 20
-    
-    jenkins_allow_signups: false
-    
-    jenkins_admins:         # format: [ username, password ]
-      - ['admin','admin']
-    
-    jenkins_cli_jar: /opt/jenkins/jenkins-cli.jar
-    jenkins_home: /var/lib/jenkins
-    jenkins_java_cmd: ''
-    jenkins_user: jenkins
-    jenkins_java_options: "-Djava.awt.headless=true"
-    jenkins_debug_level: 5
-    jenkins_access_log: no
-    jenkins_args: ''
-    
-    jenkins_conn_retries: 60
-    jenkins_conn_delay: 10
-    
-    jenkins_plugins:
-      - git-client 
-      - git
+* ``jenkins_initial_password`` - Must have a value before run any task.
+
+Please refer to the [defaults/main.yml](defaults/main.yml) file for a list of variables along with additional documentation.
 
 Example Playbook
 ----------------
 
-    ---
-    - name: Configure Jenkins servers
-      hosts: localhost
-      become: yes
+```
+---
 
-      roles:
 
-        - role: jenkins
-          jenkins_hostname: ci.example.com
-          jenkins_admins:
-            - ['user1','password']
-            - ['user2','password2']
-          jenkins_plugins:
-            - git-client
-            - git
-            - publish-over-ssh
-            - nodejs
+- name: Configure Jenkins test server
+  hosts: localhost
 
+  roles:
+    - role: facts
+    - role: jenkins
+        jenkins_hostname: localhost
+        jenkins_port: 8080
+        jenkins_initial_password: 'test'
+        jenkins_admins:
+          - 'user1'
+          - 'user2'
+        jenkins_plugins:
+          - git-client
+          - git
+          - publish-over-ssh
+          - nodejs
+
+```
 License
 -------
 
 MIT
+
+Author Information
+------------------
+
+* Inclusive Design Research Centre (OCAD University)
+* Raising the floor - International
+

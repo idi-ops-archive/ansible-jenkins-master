@@ -7,16 +7,35 @@
 # Directory where Jenkins store its configuration and working
 # files (checkouts, build reports, artifacts, ...).
 #
-JENKINS_HOME="{{ jenkins_home }}"
+{% if jenkins_home is defined %}
+JENKINS_HOME="-DJENKINS_HOME={{ jenkins_home }}"
+{% else %}
+JENKINS_HOME="-DJENKINS_HOME=/var/lib/jenkins"
+{% endif %}
+
+## Type:        string
+## Default:     "/usr/lib/jenkins/jenkins.war"
+## ServiceRestart: jenkins
+#
+# Main war file to run Jenkins
+#
+{% if jenkins_war is defined %}
+JENKINS_WAR="{{ jenkins_war }}"
+{% else %}
+JENKINS_WAR="/usr/lib/jenkins/jenkins.war"
+{% endif %}
 
 ## Type:        string
 ## Default:     ""
 ## ServiceRestart: jenkins
 #
 # Java executable to run Jenkins
-# When left empty, we'll try to find the suitable Java.
 #
+{% if jenkins_java_cmd is defined %}
 JENKINS_JAVA_CMD="{{ jenkins_java_cmd }}"
+{% else %}
+JENKINS_JAVA_CMD="/bin/java"
+{% endif %}
 
 ## Type:        string
 ## Default:     "jenkins"
@@ -26,7 +45,11 @@ JENKINS_JAVA_CMD="{{ jenkins_java_cmd }}"
 # Be careful when you change this, as you need to update
 # permissions of $JENKINS_HOME and /var/log/jenkins.
 #
+{% if jenkins_user is defined %}
 JENKINS_USER="{{ jenkins_user }}"
+{% else %}
+JENKINS_USER="jenkins"
+{% endif %}
 
 ## Type:        string
 ## Default: "false"
@@ -44,8 +67,36 @@ JENKINS_USER="{{ jenkins_user }}"
 #
 # Options to pass to java when running Jenkins.
 #
+{% if jenkins_java_options is defined %}
 JENKINS_JAVA_OPTIONS="{{ jenkins_java_options }}"
+{% else %}
+JENKINS_JAVA_OPTIONS="-Djava.awt.headless=true"
+{% endif %}
 
+## Type: string
+## Default:     "/var/log/jenkins/jenkins.log"
+## ServiceRestart: jenkins
+#
+# Jenkins' log file
+#
+{% if jenkins_logfile is defined %}
+JENKINS_LOGFILE="--logfile={{ jenkins_logfile }}"
+{% else %}
+JENKINS_LOGFILE="--logfile=/var/log/jenkins/jenkins.log" 
+{% endif %} 
+ 
+## Type: string
+## Default:     "-Djava.awt.headless=true"
+## ServiceRestart: jenkins
+#
+# Options to pass to java when running Jenkins.
+#
+{% if jenkins_webroot is defined %}
+JENKINS_WEBROOT="--webroot={{ jenkins_webroot }}"
+{% else %}
+JENKINS_WEBROOT="--webroot=/var/cache/jenkins/war"
+{% endif %}
+ 
 ## Type:        integer(0:65535)
 ## Default:     8080
 ## ServiceRestart: jenkins
@@ -53,7 +104,11 @@ JENKINS_JAVA_OPTIONS="{{ jenkins_java_options }}"
 # Port Jenkins is listening on.
 # Set to -1 to disable
 #
-JENKINS_PORT="{{ jenkins_port }}"
+{% if jenkins_port is defined %}
+JENKINS_PORT="--httpPort={{ jenkins_port }}"
+{% else %}
+#JENKINS_PORT=
+{% endif %}
 
 ## Type:        string
 ## Default:     ""
@@ -62,7 +117,11 @@ JENKINS_PORT="{{ jenkins_port }}"
 # IP address Jenkins listens on for HTTP requests.
 # Default is all interfaces (0.0.0.0).
 #
-JENKINS_LISTEN_ADDRESS="{{ jenkins_listen_address }}"
+{% if jenkins_listen_address is defined %}
+JENKINS_LISTEN_ADDRESS="--httpListenAddress={{ jenkins_listen_address }}"
+{% else %}
+#JENKINS_LISTEN_ADDRESS=
+{% endif %}
 
 ## Type:        integer(0:65535)
 ## Default:     ""
@@ -71,7 +130,11 @@ JENKINS_LISTEN_ADDRESS="{{ jenkins_listen_address }}"
 # HTTPS port Jenkins is listening on.
 # Default is disabled.
 #
-JENKINS_HTTPS_PORT=""
+{% if jenkins_https_port is defined %}
+JENKINS_HTTPS_PORT="--httpsPort={{ jenkins_https_port }}"
+{% else %}
+#JENKINS_HTTPS_PORT=
+{% endif %}
 
 ## Type:        string
 ## Default:     ""
@@ -80,7 +143,11 @@ JENKINS_HTTPS_PORT=""
 # Path to the keystore in JKS format (as created by the JDK 'keytool').
 # Default is disabled.
 #
-JENKINS_HTTPS_KEYSTORE=""
+{% if jenkins_https_keystore is defined %}
+JENKINS_HTTPS_KEYSTORE="--httpsKeyStore={{ jenkins_https_keystore }}"
+{% else %}
+#JENKINS_HTTPS_KEYSTORE=
+{% endif %}
 
 ## Type:        string
 ## Default:     ""
@@ -89,7 +156,11 @@ JENKINS_HTTPS_KEYSTORE=""
 # Password to access the keystore defined in JENKINS_HTTPS_KEYSTORE.
 # Default is disabled.
 #
-JENKINS_HTTPS_KEYSTORE_PASSWORD=""
+{% if jenkins_https_keystore_password is defined %}
+JENKINS_HTTPS_KEYSTORE_PASSWORD="--httpsKeyStorePassword='{{jenkins_https_keystore_password}}'"
+{% else %}
+#JENKINS_HTTPS_KEYSTORE_PASSWORD=
+{% endif %}
 
 ## Type:        string
 ## Default:     ""
@@ -98,7 +169,11 @@ JENKINS_HTTPS_KEYSTORE_PASSWORD=""
 # IP address Jenkins listens on for HTTPS requests.
 # Default is disabled.
 #
-JENKINS_HTTPS_LISTEN_ADDRESS=""
+{% if jenkins_https_listen_address is defined %}
+JENKINS_HTTPS_LISTEN_ADDRESS="--httpsListenAddress={{ jenkins_https_listen_address }}"
+{% else %}
+#JENKINS_HTTPS_LISTEN_ADDRESS=
+{% endif %}
 
 ## Type:        integer(0:65535)
 ## Default:     8009
@@ -107,7 +182,11 @@ JENKINS_HTTPS_LISTEN_ADDRESS=""
 # Ajp13 Port Jenkins is listening on.
 # Set to -1 to disable
 #
-JENKINS_AJP_PORT="-1"
+{% if jenkins_ajp_port is defined %}
+JENKINS_AJP_PORT="--ajp13Port={{ jenkins_ajp_port }}"
+{% else %}
+JENKINS_AJP_PORT="--ajp13Port=-1"
+{% endif %}
 
 ## Type:        string
 ## Default:     ""
@@ -116,7 +195,11 @@ JENKINS_AJP_PORT="-1"
 # IP address Jenkins listens on for Ajp13 requests.
 # Default is all interfaces (0.0.0.0).
 #
-JENKINS_AJP_LISTEN_ADDRESS=""
+{% if jenkins_ajp_listen_address is defined %}
+JENKINS_AJP_LISTEN_ADDRESS="--ajp13ListenAddress={{ jenkins_ajp_listen_address }}"
+{% else %}
+#JENKINS_AJP_LISTEN_ADDRESS=
+{% endif %}
 
 ## Type:        integer(1:9)
 ## Default:     5
@@ -125,7 +208,11 @@ JENKINS_AJP_LISTEN_ADDRESS=""
 # Debug level for logs -- the higher the value, the more verbose.
 # 5 is INFO.
 #
-JENKINS_DEBUG_LEVEL="{{ jenkins_debug_level }}"
+{% if jenkins_debug_level is defined %}
+JENKINS_DEBUG_LEVEL="--debug={{ jenkins_debug_level }}"
+{% else %}
+#JENKINS_DEBUG_LEVEL=
+{% endif %}
 
 ## Type:        yesno
 ## Default:     no
@@ -133,7 +220,11 @@ JENKINS_DEBUG_LEVEL="{{ jenkins_debug_level }}"
 #
 # Whether to enable access logging or not.
 #
-JENKINS_ENABLE_ACCESS_LOG="{% if jenkins_access_log %}yes{% else %}no{% endif %}"
+{% if jenkins_access_log is defined %}
+JENKINS_ENABLE_ACCESS_LOG="--accessLoggerClassName=winstone.accesslog.SimpleAccessLogger --simpleAccessLogger.format=combined --simpleAccessLogger.file={{ jenkins_access_log_file|default('/var/log/jenkins/access_log') }}"
+{% else %}
+#JENKINS_ENABLE_ACCESS_LOG=
+{% endif %}
 
 ## Type:        integer
 ## Default:     100
@@ -141,7 +232,11 @@ JENKINS_ENABLE_ACCESS_LOG="{% if jenkins_access_log %}yes{% else %}no{% endif %}
 #
 # Maximum number of HTTP worker threads.
 #
-JENKINS_HANDLER_MAX="{{ jenkins_handler_max }}"
+{% if jenkins_handler_max is defined %}
+JENKINS_HANDLER_MAX="--handlerCountMax={{ jenkins_handler_max }}"
+{% else %}
+#JENKINS_HANDLER_MAX=
+{% endif %}
 
 ## Type:        integer
 ## Default:     20
@@ -149,8 +244,18 @@ JENKINS_HANDLER_MAX="{{ jenkins_handler_max }}"
 #
 # Maximum number of idle HTTP worker threads.
 #
-JENKINS_HANDLER_IDLE="{{ jenkins_handler_idle }}"
+{% if jenkins_handler_idle is defined %}
+JENKINS_HANDLER_IDLE="--handlerCountMaxIdle={{ jenkins_handler_idle }}"
+{% else %}
+#JENKINS_HANDLER_IDLE=
+{% endif %}
 
+{% if jenkins_handler_startup is defined %}
+JENKINS_HANDLER_STARTUP="--handlerCountStartup={{ jenkins_handler_startup }}"
+{% else %}
+#JENKINS_HANDLER_STARTUP=
+{% endif %}
+ 
 ## Type:        string
 ## Default:     ""
 ## ServiceRestart: jenkins

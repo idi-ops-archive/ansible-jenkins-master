@@ -1,5 +1,18 @@
 ---
 
 - include: install.yml
-- include: plugins.yml
-- include: security.yml
+  tags:
+    - install
+  
+- include: configure.yml
+  tags:
+    - configure
+
+- include: deploy.yml
+  tags:
+    - deploy
+
+- include: test.yml
+  tags:
+    - test
+
