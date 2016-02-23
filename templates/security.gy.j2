@@ -7,13 +7,13 @@ def hudsonRealm = new HudsonPrivateSecurityRealm({% if jenkins_allow_signups %}t
 def strategy = new GlobalMatrixAuthorizationStrategy()
 
 {% for entry in jenkins_admins %}
-hudsonRealm.createAccount("{{ entry }}","{{ jenkins_initial_password }}")
+hudsonRealm.createAccount("{{ entry[0] }}","{{ entry[1] }}")
 {% endfor %}
 
 instance.setSecurityRealm(hudsonRealm)
 
 {% for entry in jenkins_admins %}
-strategy.add(Jenkins.ADMINISTER, "{{ entry }}")
+strategy.add(Jenkins.ADMINISTER, "{{ entry[0] }}")
 {% endfor %}
 
 strategy.add(Item.READ, "anonymous")

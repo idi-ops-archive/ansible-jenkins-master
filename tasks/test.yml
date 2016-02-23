@@ -20,7 +20,7 @@
   changed_when: false
  
 - name: Login cli
-  command: "java -jar /opt/jenkins/jenkins-cli.jar -s http://localhost:8080 login --username {{ jenkins_admins[0] }} --password {{ jenkins_initial_password }}"
+  command: "java -jar /opt/jenkins/jenkins-cli.jar -s http://localhost:8080 login --username {{ jenkins_admins[0][0] }} --password {{ jenkins_admins[0][1] }}"
  
 - name: Get list of currently installed plugins
   shell: "java -jar {{ jenkins_cli_jar }} -s http://localhost:{{ jenkins_port }}/ list-plugins | awk '{ print $1 }'"

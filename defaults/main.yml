@@ -10,9 +10,9 @@ jenkins_handler_idle: 20
 jenkins_allow_signups: false
 
 jenkins_admins:
-  - admin
+#  - ['admin', 'secretpassword']
 
-jenkins_admin_credentials: "--username {{ jenkins_admins[0] }} --password {{ jenkins_initial_password }}"
+jenkins_admin_credentials: "--username {{ jenkins_admins[0][0] }} --password {{ jenkins_admins[0][1] }}"
 jenkins_aux_dir: /opt/jenkins
 jenkins_cli_jar: /opt/jenkins/jenkins-cli.jar
 jenkins_home: /var/lib/jenkins

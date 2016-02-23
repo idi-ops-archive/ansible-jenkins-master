@@ -24,7 +24,7 @@ Requirements
 Role Variables
 --------------
 
-* ``jenkins_initial_password`` - Must have a value before run any task.
+* ``jenkins_admins`` - List of administration credentials, it contains a list of pairs [ 'adminuser', 'password' ]
 
 Please refer to the [defaults/main.yml](defaults/main.yml) file for a list of variables along with additional documentation.
 
@@ -43,10 +43,9 @@ Example Playbook
     - role: jenkins
         jenkins_hostname: localhost
         jenkins_port: 8080
-        jenkins_initial_password: 'test'
         jenkins_admins:
-          - 'user1'
-          - 'user2'
+          - ['user1', 'password1']
+          - ['user2', 'password2']
         jenkins_plugins:
           - git-client
           - git
