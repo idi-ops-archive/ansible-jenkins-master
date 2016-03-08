@@ -15,13 +15,13 @@
   yum:
     name: "{{ item }}"
     state: latest
-  with_items: jenkins_packages
+  with_items: "{{ jenkins_packages }}"
 
 - name: Install required pip packages
   pip:
     name: "{{ item }}"
     state: latest
-  with_items: jenkins_pip_packages
+  with_items: "{{ jenkins_pip_packages }}"
 
 - name: Remove old upstart startup script
   file:
@@ -32,9 +32,9 @@
   template:
     src: jenkins.service.j2
     dest: /usr/lib/systemd/system/jenkins.service
-  when: not is_docker
+  when: "{{ not is_docker }}"
 
 - name: Reload Systemd
   command: systemctl daemon-reload
-  when: not is_docker
+  when: "{{ not is_docker }}"
 

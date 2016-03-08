@@ -26,20 +26,20 @@
   copy:
     src: jenkins_jobs.ini
     dest: "{{ jenkins_home }}/jenkins_jobs.ini"
-    owner: jenkins
+    owner: "{{ jenkins_user }}"
     mode: 0640
 
 - name: Configure Jenkins startup
   template:
     src: sysconfig.j2
     dest: /etc/sysconfig/jenkins
-  when: not is_docker
+  when: "{{ not is_docker }}"
 
 - name: Enable and start Jenkins
   service:
     name: jenkins
     state: started
-  when: not is_docker
+  when: "{{ not is_docker}}"
 
 - name: Start Jenkins (Docker)
   command: >
@@ -55,15 +55,15 @@
     --debug={{ jenkins_debug_level }}
     --handlerCountMax={{ jenkins_handler_max }}
     --handlerCountMaxIdle={{ jenkins_handler_idle }}
-  when: is_docker
+  when: "{{ is_docker }}"
 
 - name: Waiting for port listening
-  wait_for: 
+  wait_for:
     host: "{{ jenkins_listen_address }}"
     port: "{{ jenkins_port }}"
 
 - name: Wait for Jenkins to be ready
-  uri: 
+  uri:
     url: "http://{{ jenkins_listen_address }}:{{ jenkins_port }}/cli/"
     return_content: yes
     status_code: "200,403,401,503"
@@ -151,5 +151,5 @@
   service:
     name: jenkins
     state: stopped
-  when: not is_docker
+  when: "{{ not is_docker }}"
 
