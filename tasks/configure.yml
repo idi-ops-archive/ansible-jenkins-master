@@ -121,6 +121,22 @@
     path: "{{ mktemp.stdout }}"
     state: absent
 
+- name: Transfer Groovy script to setup the master configuration
+  template:
+    src: configuration.gv.j2
+    dest: "{{ mktemp.stdout }}"
+    backup: no
+
+- name: Exect groovy script
+  shell: "java -jar {{ jenkins_cli_jar }} -s http://{{ jenkins_listen_address  }}:{{ jenkins_port}}/ groovy {{ mktemp.stdout }} {{ jenkins_admin_credentials }}"
+
+- name: Set slave to master security
+  template:
+    src: "slave-to-master-security-kill-switch.j2"
+    dest: "{{ jenkins_home }}/secrets/slave-to-master-security-kill-switch"
+    backup: no
+    owner: "{{ jenkins_user }}"
+
 - name: Stop Jenkins (end of configure step)
   service:
     name: jenkins

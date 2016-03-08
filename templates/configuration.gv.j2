@@ -1,0 +1,42 @@
+import jenkins.model.*
+
+def instance = Jenkins.getInstance()
+
+{% if jenkins_master_jnlpport is defined %}
+// JNLP port config
+instance.setSlaveAgentPort({{ jenkins_master_jnlpport }})
+{% endif %}
+
+{% if jenkins_master_adminname is defined and jenkins_master_adminemail is defined %}
+// Admin email config
+def jenkinsLocationConfiguration = JenkinsLocationConfiguration.get()
+
+jenkinsLocationConfiguration.setAdminAddress("{{ jenkins_master_adminname }} <{{ jenkins_master_adminemail }}>")
+
+jenkinsLocationConfiguration.save()
+{% endif %}
+
+{% if jenkins_master_smtp_host is defined and
+      jenkins_master_smtp_user is defined and
+      jenkins_master_smtp_password is defined and
+      jenkins_master_smtp_reply_address is defined and
+      jenkins_master_smtp_ssl is defined and
+      jenkins_master_smtp_port is defined and
+      jenkins_master_smtp_charset is defined %}
+// Mail server config
+def desc = instance.getDescriptor("hudson.tasks.Mailer")
+
+desc.setSmtpAuth("{{ jenkins_master_smtp_user }}", "{{ jenkins_master_smtp_password }}")
+desc.setReplyToAddress("{{ jenkins_master_smtp_reply_address }}")
+desc.setSmtpHost("{{ jenkins_master_smtp_host }}")
+desc.setUseSsl({{ jenkins_master_smtp_ssl }})
+desc.setSmtpPort("{{ jenkins_master_smtp_port }}")
+desc.setCharset("{{ jenkins_master_smtp_charset }}")
+
+desc.save()
+{% endif %}
+
+// Number of executors
+instance.setNumExecutors({{ jenkins_master_nexecutors }})
+
+instance.save()

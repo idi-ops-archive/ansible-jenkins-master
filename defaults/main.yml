@@ -26,6 +26,9 @@ jenkins_args: ''
 jenkins_conn_retries: 60
 jenkins_conn_delay: 10
 
+jenkins_master_nexecutors: 0
+jenkins_master_slavetomastersecurity: true
+
 jenkins_plugins:
   ant: "1.2"
   antisamy-markup-formatter: "1.3"
