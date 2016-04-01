@@ -16,5 +16,5 @@ jenkins_packages:
   - unzip
 
 jenkins_pip_packages:
-  - jenkins-job-builder
+  - "git+https://github.com/amatas/jenkins-job-builder@docker#egg=jenkins-job-builder"
 
