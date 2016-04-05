@@ -1,0 +1,6 @@
+import jenkins.security.*        
+import hudson.model.*
+User u = User.get("{{ jenkins_master_userapi | default( jenkins_admins[0][0] ) }}")  
+ApiTokenProperty t = u.getProperty(ApiTokenProperty.class)  
+println t.getApiToken()
+

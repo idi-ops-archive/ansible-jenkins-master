@@ -22,12 +22,6 @@
 - name: Extract the jenkins_cli jarfile
   command: unzip -oj /usr/lib/jenkins/jenkins.war WEB-INF/jenkins-cli.jar -d /opt/jenkins/
 
-- name: Transfer jenkins-jobs configuration (missing token)
-  copy:
-    src: jenkins_jobs.ini
-    dest: "{{ jenkins_home }}/jenkins_jobs.ini"
-    owner: "{{ jenkins_user }}"
-    mode: 0640
 
 - name: Configure Jenkins startup
   template:
@@ -131,15 +125,67 @@
     path: "{{ mktemp.stdout }}"
     state: absent
 
+- name: Transfer Groovy script used for security configuration
+  template:
+    src: credentials.gv.j2
+    dest: "{{ mktemp.stdout }}"
+    backup: no
+
+- name: Set credentials
+  shell: "java -jar {{ jenkins_cli_jar }} -s http://{{ jenkins_listen_address  }}:{{ jenkins_port}}/ groovy {{ mktemp.stdout }}"
+  register: jenkins_security
+  ignore_errors: True
+
+- name: Set credentials
+  shell: "java -jar {{ jenkins_cli_jar }} -s http://{{ jenkins_listen_address  }}:{{ jenkins_port}}/ groovy {{ mktemp.stdout }} {{ jenkins_admin_credentials }}"
+  when: jenkins_security.stderr.find("hudson.security.AccessDeniedException2") != -1
+
+- name: Remove Groovy script
+  file:
+    path: "{{ mktemp.stdout }}"
+    state: absent
+
 - name: Transfer Groovy script to setup the master configuration
   template:
     src: configuration.gv.j2
     dest: "{{ mktemp.stdout }}"
     backup: no
-
+ 
 - name: Exect groovy script
   shell: "java -jar {{ jenkins_cli_jar }} -s http://{{ jenkins_listen_address  }}:{{ jenkins_port}}/ groovy {{ mktemp.stdout }} {{ jenkins_admin_credentials }}"
 
+- name: Remove Groovy script
+  file:
+    path: "{{ mktemp.stdout }}"
+    state: absent
+
+- name: Transfer Groovy script to get the user token
+  template:
+    src: get_user_token.gv.j2
+    dest: "{{ mktemp.stdout }}"
+    backup: no
+ 
+- name: Exect groovy script
+  shell: "java -jar {{ jenkins_cli_jar }} -s http://{{ jenkins_listen_address  }}:{{ jenkins_port}}/ groovy {{ mktemp.stdout }} {{ jenkins_admin_credentials }}"
+  register: std_user_token
+
+- name: Remove Groovy script
+  file:
+    path: "{{ mktemp.stdout }}"
+    state: absent
+ 
+- debug: var=std_user_token
+
+- name: Set token fact
+  set_fact: jenkins_user_token={{ std_user_token.stdout }}
+
+- name: Transfer jenkins-jobs configuration (missing token)
+  template:
+    src: jenkins_jobs.ini.j2
+    dest: "{{ jenkins_home }}/jenkins_jobs.ini"
+    owner: "{{ jenkins_user }}"
+    mode: 0640
+ 
 - name: Set slave to master security
   template:
     src: "slave-to-master-security-kill-switch.j2"

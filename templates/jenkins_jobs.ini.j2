@@ -4,7 +4,7 @@ recursive=False
 allow_duplicates=False
 
 [jenkins]
-user=deploy
-password=
+user={{ jenkins_master_userapi | default( jenkins_admins[0][0] )}}
+password={{ jenkins_user_token }}
 url=http://localhost:8080
 
