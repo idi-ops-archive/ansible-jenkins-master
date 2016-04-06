@@ -46,11 +46,16 @@ Example Playbook
         jenkins_admins:
           - ['user1', 'password1']
           - ['user2', 'password2']
+        jenkins_master_credentials:
+          - id: 'new-credentials'
+            description: 'Credentials'
+            username: 'user'
+            password: 'password'
         jenkins_plugins:
-          - git-client
-          - git
-          - publish-over-ssh
-          - nodejs
+          - git: "2.4.4"
+          - git-client: "1.19.6"
+          - github: "1.18.1"
+          - github-api: "1.72.1" 
 
 ```
 License
