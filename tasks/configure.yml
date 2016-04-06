@@ -22,7 +22,6 @@
 - name: Extract the jenkins_cli jarfile
   command: unzip -oj /usr/lib/jenkins/jenkins.war WEB-INF/jenkins-cli.jar -d /opt/jenkins/
 
-
 - name: Configure Jenkins startup
   template:
     src: sysconfig.j2
@@ -83,7 +82,7 @@
   notify:
     - restart jenkins
 
-- name: Wait for the plugin installation
+- name: Wait for the plugins installation
   async_status: jid={{ item.ansible_job_id }}
   register: job_result
   until: job_result.finished
@@ -101,91 +100,56 @@
   notify:
     - restart jenkins
 
-- name: Generate temporary file
-  command: /usr/bin/mktemp
+- name: Generate temporary directory
+  command: /usr/bin/mktemp -d
   register: mktemp
 
-- name: Transfer Groovy script used for security configuration
+- name: Transfer Groovy scripts
   template:
-    src: security.gy.j2
-    dest: "{{ mktemp.stdout }}"
+    src: "{{ item }}.j2"
+    dest: "{{ mktemp.stdout }}/{{ item }}"
     backup: no
+  with_items:
+    - security.gv
+    - credentials.gv
+    - configuration.gv
+    - get_user_token.gv
 
-- name: Enable matrix-based security and create administrators
-  shell: "java -jar {{ jenkins_cli_jar }} -s http://{{ jenkins_listen_address  }}:{{ jenkins_port}}/ groovy {{ mktemp.stdout }}"
-  register: jenkins_security
+- name: Try to login (first attempt)
+  shell: "java -jar {{ jenkins_cli_jar }} -s http://{{ jenkins_listen_address  }}:{{ jenkins_port}}/ login {{ jenkins_admin_credentials }}" 
   ignore_errors: True
 
 - name: Enable matrix-based security and create administrators
-  shell: "java -jar {{ jenkins_cli_jar }} -s http://{{ jenkins_listen_address  }}:{{ jenkins_port}}/ groovy {{ mktemp.stdout }} {{ jenkins_admin_credentials }}"
-  when: jenkins_security.stderr.find("hudson.security.AccessDeniedException2") != -1
+  shell: "java -jar {{ jenkins_cli_jar }} -s http://{{ jenkins_listen_address  }}:{{ jenkins_port}}/ groovy {{ mktemp.stdout }}/security.gv"
 
-- name: Remove Groovy script
-  file:
-    path: "{{ mktemp.stdout }}"
-    state: absent
-
-- name: Transfer Groovy script used for security configuration
-  template:
-    src: credentials.gv.j2
-    dest: "{{ mktemp.stdout }}"
-    backup: no
-
-- name: Set credentials
-  shell: "java -jar {{ jenkins_cli_jar }} -s http://{{ jenkins_listen_address  }}:{{ jenkins_port}}/ groovy {{ mktemp.stdout }}"
-  register: jenkins_security
-  ignore_errors: True
-
-- name: Set credentials
-  shell: "java -jar {{ jenkins_cli_jar }} -s http://{{ jenkins_listen_address  }}:{{ jenkins_port}}/ groovy {{ mktemp.stdout }} {{ jenkins_admin_credentials }}"
-  when: jenkins_security.stderr.find("hudson.security.AccessDeniedException2") != -1
-
-- name: Remove Groovy script
-  file:
-    path: "{{ mktemp.stdout }}"
-    state: absent
-
-- name: Transfer Groovy script to setup the master configuration
-  template:
-    src: configuration.gv.j2
-    dest: "{{ mktemp.stdout }}"
-    backup: no
+- name: Try to login (second attempt)
+  shell: "java -jar {{ jenkins_cli_jar }} -s http://{{ jenkins_listen_address  }}:{{ jenkins_port}}/ login {{ jenkins_admin_credentials }}" 
  
-- name: Exect groovy script
-  shell: "java -jar {{ jenkins_cli_jar }} -s http://{{ jenkins_listen_address  }}:{{ jenkins_port}}/ groovy {{ mktemp.stdout }} {{ jenkins_admin_credentials }}"
+- name: Exec groovy scripts
+  shell: "java -jar {{ jenkins_cli_jar }} -s http://{{ jenkins_listen_address  }}:{{ jenkins_port}}/ groovy {{ mktemp.stdout }}/{{ item }}"
+  with_items:
+    - credentials.gv
+    - configuration.gv
 
-- name: Remove Groovy script
+- name: Exec groovy script to get the user token
+  shell: "java -jar {{ jenkins_cli_jar }} -s http://{{ jenkins_listen_address  }}:{{ jenkins_port}}/ groovy {{ mktemp.stdout }}/get_user_token.gv {{ jenkins_admin_credentials }}"
+  register: std_user_token        
+
+- name: Remove temporal directory
   file:
     path: "{{ mktemp.stdout }}"
     state: absent
-
-- name: Transfer Groovy script to get the user token
-  template:
-    src: get_user_token.gv.j2
-    dest: "{{ mktemp.stdout }}"
-    backup: no
- 
-- name: Exect groovy script
-  shell: "java -jar {{ jenkins_cli_jar }} -s http://{{ jenkins_listen_address  }}:{{ jenkins_port}}/ groovy {{ mktemp.stdout }} {{ jenkins_admin_credentials }}"
-  register: std_user_token
-
-- name: Remove Groovy script
-  file:
-    path: "{{ mktemp.stdout }}"
-    state: absent
- 
-- debug: var=std_user_token
 
 - name: Set token fact
   set_fact: jenkins_user_token={{ std_user_token.stdout }}
 
-- name: Transfer jenkins-jobs configuration (missing token)
+- name: Transfer jenkins-jobs configuration
   template:
     src: jenkins_jobs.ini.j2
     dest: "{{ jenkins_home }}/jenkins_jobs.ini"
     owner: "{{ jenkins_user }}"
     mode: 0640
- 
+
 - name: Set slave to master security
   template:
     src: "slave-to-master-security-kill-switch.j2"
