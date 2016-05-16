@@ -63,9 +63,9 @@
     status_code: "200,403,401,503"
   register: result
   until: >
-    ((result.status == 200) or
-    (result.content.find("Authentication required") != -1)) and
-    (result.content.find("Please wait while") == -1)
+    (result.status == 200) or
+    ((result.status == 403) and
+    (result.x_required_permission is defined))
   retries: "{{ jenkins_conn_retries }}"
   delay: "{{ jenkins_conn_delay }}"
   changed_when: false
@@ -117,15 +117,15 @@
     - get_user_token.gv
 
 - name: Try to login (first attempt)
-  shell: "java -jar {{ jenkins_cli_jar }} -s http://{{ jenkins_listen_address  }}:{{ jenkins_port}}/ login {{ jenkins_admin_credentials }}" 
+  shell: "java -jar {{ jenkins_cli_jar }} -s http://{{ jenkins_listen_address  }}:{{ jenkins_port}}/ login {{ jenkins_admin_credentials }}"
   ignore_errors: True
 
 - name: Enable matrix-based security and create administrators
   shell: "java -jar {{ jenkins_cli_jar }} -s http://{{ jenkins_listen_address  }}:{{ jenkins_port}}/ groovy {{ mktemp.stdout }}/security.gv"
 
 - name: Try to login (second attempt)
-  shell: "java -jar {{ jenkins_cli_jar }} -s http://{{ jenkins_listen_address  }}:{{ jenkins_port}}/ login {{ jenkins_admin_credentials }}" 
- 
+  shell: "java -jar {{ jenkins_cli_jar }} -s http://{{ jenkins_listen_address  }}:{{ jenkins_port}}/ login {{ jenkins_admin_credentials }}"
+
 - name: Exec groovy scripts
   shell: "java -jar {{ jenkins_cli_jar }} -s http://{{ jenkins_listen_address  }}:{{ jenkins_port}}/ groovy {{ mktemp.stdout }}/{{ item }}"
   with_items:
@@ -134,7 +134,7 @@
 
 - name: Exec groovy script to get the user token
   shell: "java -jar {{ jenkins_cli_jar }} -s http://{{ jenkins_listen_address  }}:{{ jenkins_port}}/ groovy {{ mktemp.stdout }}/get_user_token.gv {{ jenkins_admin_credentials }}"
-  register: std_user_token        
+  register: std_user_token
 
 - name: Remove temporal directory
   file:
