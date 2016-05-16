@@ -18,7 +18,7 @@ jenkins_cli_jar: /opt/jenkins/jenkins-cli.jar
 jenkins_home: /var/lib/jenkins
 jenkins_java_cmd: '/bin/java'
 jenkins_user: jenkins
-jenkins_java_options: "-Djava.awt.headless=true"
+jenkins_java_options: "-Djava.awt.headless=true -Djenkins.install.runSetupWizard=false"
 jenkins_debug_level: 5
 jenkins_access_log: no
 jenkins_args: ''

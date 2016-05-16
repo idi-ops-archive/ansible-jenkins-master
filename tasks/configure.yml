@@ -39,6 +39,7 @@
     su - {{ jenkins_user }}
     -c /bin/java {{ jenkins_java_options }}
     -DJENKINS_HOME={{ jenkins_home }}
+    -Djenkins.install.runSetupWizard=false
     -jar /usr/lib/jenkins/jenkins.war
     --webroot=/var/cache/jenkins/war
     --httpPort={{ jenkins_port }}

@@ -70,7 +70,7 @@ JENKINS_USER="jenkins"
 {% if jenkins_java_options is defined %}
 JENKINS_JAVA_OPTIONS="{{ jenkins_java_options }}"
 {% else %}
-JENKINS_JAVA_OPTIONS="-Djava.awt.headless=true"
+JENKINS_JAVA_OPTIONS="-Djava.awt.headless=true -Djenkins.install.runSetupWizard=false"
 {% endif %}
 
 ## Type: string
