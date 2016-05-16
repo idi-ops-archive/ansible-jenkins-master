@@ -28,6 +28,12 @@
     dest: /etc/sysconfig/jenkins
   when: "{{ not is_docker }}"
 
+- name: Set Wizard flag
+  copy:
+    dest: /var/lib/jenkins/jenkins.install.UpgradeWizard.state
+    src: jenkins.install.UpgradeWizard.state
+    owner: "{{ jenkins_user  }}"
+
 - name: Enable and start Jenkins
   service:
     name: jenkins
@@ -126,6 +132,31 @@
 - name: Try to login (second attempt)
   shell: "java -jar {{ jenkins_cli_jar }} -s http://{{ jenkins_listen_address  }}:{{ jenkins_port}}/ login {{ jenkins_admin_credentials }}"
 
+- name: Restart Jenkins to refresh Groovy API
+  service:
+    name: jenkins
+    state: restarted
+  when: "{{ not is_docker}}"
+
+- name: Waiting for port listening
+  wait_for:
+    host: "{{ jenkins_listen_address }}"
+    port: "{{ jenkins_port }}"
+ 
+- name: Wait for Jenkins to be ready
+  uri:
+    url: "http://{{ jenkins_listen_address }}:{{ jenkins_port }}/cli/"
+    return_content: yes
+    status_code: "200,403,401,503"
+  register: result
+  until: >
+    (result.status == 200) or
+    ((result.status == 403) and
+    (result.x_required_permission is defined))
+  retries: "{{ jenkins_conn_retries }}"
+  delay: "{{ jenkins_conn_delay }}"
+  changed_when: false
+ 
 - name: Exec groovy scripts
   shell: "java -jar {{ jenkins_cli_jar }} -s http://{{ jenkins_listen_address  }}:{{ jenkins_port}}/ groovy {{ mktemp.stdout }}/{{ item }}"
   with_items:
