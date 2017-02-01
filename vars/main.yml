@@ -1,10 +1,10 @@
 ---
 
-jenkins_repo: http://pkg.jenkins-ci.org/redhat/jenkins.repo
+jenkins_repo: https://pkg.jenkins.io/redhat-stable/jenkins.repo
 
-jenkins_repo_key: http://pkg.jenkins-ci.org/redhat/jenkins-ci.org.key
+jenkins_repo_key: https://pkg.jenkins.io/redhat-stable/jenkins.io.key
 
-jenkins_updates_url: https://updates.jenkins-ci.org
+jenkins_updates_url: https://updates.jenkins.io
 
 jenkins_packages:
   - jenkins
@@ -17,4 +17,3 @@ jenkins_packages:
 
 jenkins_pip_packages:
   - "git+https://github.com/amatas/jenkins-job-builder@docker#egg=jenkins-job-builder"
-
